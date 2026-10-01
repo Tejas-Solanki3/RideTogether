@@ -8,7 +8,7 @@ Develop and preview the **Flutter app in Chrome using `flutter run -d chrome`**.
 
 The supplied reference informs mobile composition: greeting, destination search, paired route/date/passenger tiles, activity cards and a floating navigation capsule. Blue accents, taxi/bus/bike choices, wallet balances and payment flows are not invented for this campus carpool.
 
-The palette is black, white and neutral grey. Manrope provides a refined type hierarchy without proprietary Uber fonts. Bundled Lucide SVGs give one consistent icon family. Photography and avatars are now color; primary actions are black with white text/icons. Containers use restrained 16–24 px corner radii and accessible touch targets.
+The palette is black, white and neutral grey. Manrope provides a refined type hierarchy without proprietary Uber fonts. Bundled Lucide SVGs give one consistent icon family. Geometric editorial character illustrations and illustrated avatars replace photography; primary actions are black with white text/icons. Containers use restrained 16–24 px corner radii and accessible touch targets.
 
 ## Entry flow
 
@@ -25,3 +25,7 @@ The repository removes the large self-contained HTML design exports and generato
 ## Logic retained
 
 Immutable Dart Ride models, Riverpod streams, Firestore/demo adapters, exact route/day matching, group seat reservations, cancellation restoration and private chat are retained. The current 43-test Flutter suite includes regression coverage for narrow onboarding windows and saved demo-avatar migration.
+
+## Illustration system
+
+The supplied editorial portrait reference informs original angular faces, layered warm colors and fine grain. Four scene illustrations cover welcome, Home carpooling, route search and conversation. Three coordinated portraits replace the photo avatars. Get Started has no ClipRRect, border, card background or photo overlay around the artwork; transparent PNGs blend directly into the white page. Existing responsive wrapping/scrolling remains.

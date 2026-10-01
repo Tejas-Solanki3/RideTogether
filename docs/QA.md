@@ -7,7 +7,7 @@ Develop the mobile-first Flutter app in **Chrome** with `flutter run -d chrome`.
 ## Verified redesigned version
 
 - `flutter analyze`: clean.
-- **43 Flutter tests passed** (17 repository/auth/persistence, 9 domain/matching, 17 widget journeys/layout tests).
+- **44 Flutter tests passed** (17 repository/auth/persistence, 9 domain/matching, 18 widget journeys/layout tests).
 - Actual Chromium browser checks passed: short swipe resets, complete swipe opens login without authenticating, explicit email sign-in, Home/mobile navigation, Find/list/details, seat reservation, confirmation, chat send, cancellation restoration, offer publication, driver request fulfilment and sign-out.
 - Browser assertions observed the persisted demo records as well as visible Flutter controls.
 - Browser runtime errors: **none** in the checked journey.
@@ -45,3 +45,9 @@ No new APK, native-device test or native Figma file is claimed. The bulky HTML d
 ## Narrow-onboarding regression
 
 The reported `251 px` content-width overflow is covered by a `299 × 600` viewport test (24 px padding on either side). Onboarding is additionally checked at 280×540, 320×568, 360×640, 390×844 and 480×900. Benefits wrap and compact windows scroll; no overflow exceptions are suppressed. The duplicate HTML viewport meta tag was removed.
+
+## Editorial illustration update
+
+User commit `62bd6c3` was pulled first. Its upgraded package-lock versions and analyzer exclusions are preserved. `flutter pub get --enforce-lockfile` succeeds without a lockfile diff. The photo has been removed, seven original illustrated assets are bundled, and a widget regression verifies that the welcome artwork has no ClipRRect ancestor or photo-label overlay. Scene PNGs have true transparent backgrounds rather than baked white/checkerboard rectangles.
+
+The illustration browser checks cover welcome, login, Home, posting, ride cards, confirmation and empty chat at 299/390/1366 px widths, with zero runtime errors. Current screenshots use the `illustrated-` prefix and replace the old photo-based UI examples. See `ILLUSTRATION_RESULTS.json`.

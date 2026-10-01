@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_together/data/demo_repository.dart';
 import 'package:ride_together/domain/models.dart';
 import 'package:ride_together/main.dart';
+import 'package:ride_together/ui/widgets/common.dart';
 import 'package:ride_together/state/providers.dart';
 
 const capture = bool.fromEnvironment('CAPTURE_UI');
@@ -73,6 +74,20 @@ void main() {
     final loader = FontLoader('Manrope')
       ..addFont(rootBundle.load('assets/fonts/Manrope.ttf'));
     await loader.load();
+  });
+  testWidgets('welcome illustration floats without a photo frame or border', (
+    tester,
+  ) async {
+    await launch(tester, onboarded: false, signedIn: false);
+    final artwork = find.byKey(const ValueKey('welcome_illustration'));
+    expect(artwork, findsOneWidget);
+    expect(tester.widget(artwork), isA<AppIllustration>());
+    expect(
+      find.ancestor(of: artwork, matching: find.byType(ClipRRect)),
+      findsNothing,
+    );
+    expect(find.text('Your campus. Your people.'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
   for (final size in [
     const Size(280, 540),

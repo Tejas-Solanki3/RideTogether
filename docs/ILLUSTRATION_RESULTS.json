@@ -1,0 +1,18 @@
+{
+  "screens": [
+    "welcome",
+    "login",
+    "home",
+    "posting",
+    "ride cards",
+    "confirmation",
+    "empty chat"
+  ],
+  "widths": [
+    299,
+    390,
+    1366
+  ],
+  "assetStyle": "Original editorial illustrations; transparent unframed welcome",
+  "runtimeErrors": []
+}

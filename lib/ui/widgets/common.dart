@@ -4,6 +4,29 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../domain/models.dart';
 import '../theme.dart';
 
+/// Original editorial artwork. No frame, background fill, or clipping is applied.
+class AppIllustration extends StatelessWidget {
+  final String name;
+  final double? width, height;
+  final Alignment alignment;
+  const AppIllustration(
+    this.name, {
+    super.key,
+    this.width,
+    this.height,
+    this.alignment = Alignment.center,
+  });
+  @override
+  Widget build(BuildContext context) => Image.asset(
+    'assets/illustrations/$name.png',
+    width: width,
+    height: height,
+    fit: BoxFit.contain,
+    alignment: alignment,
+    excludeFromSemantics: true,
+  );
+}
+
 class AppIcon extends StatelessWidget {
   final String name;
   final double size;
@@ -486,46 +509,64 @@ Future<String?> choosePlace(
 class EmptyState extends StatelessWidget {
   final String title, body, icon;
   final Widget? action;
+  final String? illustration;
   const EmptyState(
     this.title,
     this.body, {
     super.key,
     this.icon = 'search',
     this.action,
+    this.illustration,
   });
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 22),
-    child: Column(
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: Center(child: AppIcon(icon, size: 28)),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final compact =
+          constraints.hasBoundedHeight && constraints.maxHeight < 400;
+      final scene =
+          illustration ??
+          (icon == 'message-circle' || icon == 'route'
+              ? 'good_company'
+              : icon == 'file-text'
+              ? 'shared_ride'
+              : 'find_your_people');
+      final content = Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: compact ? 18 : 32,
+          horizontal: 22,
         ),
-        const SizedBox(height: 20),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIllustration(
+              scene,
+              width: compact ? 130 : 190,
+              height: compact ? 95 : 150,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 9),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.muted,
+                height: 1.7,
+              ),
+            ),
+            if (action != null) ...[const SizedBox(height: 22), action!],
+          ],
         ),
-        const SizedBox(height: 9),
-        Text(
-          body,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.muted,
-            height: 1.7,
-          ),
-        ),
-        if (action != null) ...[const SizedBox(height: 22), action!],
-      ],
-    ),
+      );
+      return constraints.hasBoundedHeight
+          ? SingleChildScrollView(child: content)
+          : content;
+    },
   );
 }
 

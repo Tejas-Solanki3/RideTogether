@@ -116,19 +116,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 42),
-                Container(
-                  width: 58,
-                  height: 58,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Center(
-                    child: AppIcon(
-                      register ? 'users-round' : 'user-round',
-                      size: 27,
-                    ),
-                  ),
+                AppIllustration(
+                  register ? 'welcome_people' : 'good_company',
+                  width: 200,
+                  height: 120,
+                  alignment: Alignment.centerLeft,
                 ),
                 const SizedBox(height: 24),
                 Text(

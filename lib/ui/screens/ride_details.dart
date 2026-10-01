@@ -420,11 +420,7 @@ class ConfirmationScreen extends ConsumerWidget {
             const SizedBox(height: 40),
             const Align(
               alignment: Alignment.centerLeft,
-              child: CircleAvatar(
-                radius: 38,
-                backgroundColor: Colors.black,
-                child: AppIcon('check', size: 35, color: Colors.white),
-              ),
+              child: AppIllustration('good_company', width: 260, height: 150),
             ),
             const SizedBox(height: 26),
             Text(

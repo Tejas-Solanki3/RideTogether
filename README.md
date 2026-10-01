@@ -4,7 +4,9 @@
 
 RideTogether helps students **offer spare seats or request a lift** between campus-area locations. Instead of treating every journey as a taxi booking, it connects people travelling along the **same route, on the same day**, with enough seats for the whole request.
 
-The app has a mobile-first, black-and-white interface with **color photography**, bundled SVG icons and Manrope typography. It is a real Dart/Flutter application created from `flutter create`—not an HTML imitation.
+The app has a mobile-first, black-and-white interface with **editorial character illustrations**, bundled SVG icons and Manrope typography. It is a real Dart/Flutter application created from `flutter create`—not an HTML imitation.
+
+The latest artwork update is based on user commit `62bd6c3` (package upgrade). Its package-lock versions and analyzer exclusions are preserved.
 
 **Current development target:** Chrome with `flutter run -d chrome`. Android source is retained, but APK generation is not part of the current workflow.
 
@@ -146,7 +148,7 @@ flowchart LR
 
 | Screen | Purpose |
 |---|---|
-| Welcome | Color campus hero, benefits, responsive layout and genuine swipe-to-start control. |
+| Welcome | Unboxed community illustration, benefits, responsive layout and genuine swipe-to-start control. |
 | Login / Create account | Validated credentials, password visibility, reset-password action and explicit demo entry. |
 | Verify email | Blocks unverified Firebase accounts from campus data until verification is refreshed. |
 | Home | Greeting, destination picker, rider/driver intent, route, date, passenger count and search. |
@@ -216,7 +218,7 @@ The UI talks to a repository abstraction, not directly to Firestore. The demo an
 | `lib/ui/screens/my_matches.dart` | Own posts and driver/rider connections grouped by status/time. |
 | `lib/ui/screens/chat.dart` | Message stream, composer, quick replies and cancelled-conversation handling. |
 | `lib/ui/screens/profile.dart` | Account/campus information, safety/privacy sheets, local reset and sign-out. |
-| `lib/ui/widgets/common.dart` | Shared SVG icons, color avatars, surfaces, buttons, route summaries, pickers and error messages. |
+| `lib/ui/widgets/common.dart` | Shared SVG icons, illustrated avatars, surfaces, buttons, route summaries, pickers and error messages. |
 | `lib/ui/widgets/ride_card.dart` | Reusable ride cards showing owner, route, date/time, seats, suggested fuel and bookmark action. |
 | `lib/ui/widgets/route_map.dart` | Original grayscale illustrative campus map drawn in Dart; not GPS navigation. |
 
@@ -224,8 +226,8 @@ The UI talks to a repository abstraction, not directly to Firestore. The demo an
 
 | Path | Purpose |
 |---|---|
-| `assets/images/welcome_car.jpg` | Color welcome/Home campus-car image. |
-| `assets/avatars/aarav.jpg` | Requested demo profile image; portraits display in color. |
+| `assets/illustrations/` | Coordinated community, shared-ride, route-search and connection artwork with transparent backgrounds. |
+| `assets/avatars/aarav.jpg` | Illustrated demo profile portrait; the filename and demo account identity are retained. |
 | `assets/icons/` | Bundled Lucide SVG icon family and its license. |
 | `assets/fonts/` | Manrope variable font and OFL license. |
 | `assets/svg/logo.svg` | Original monochrome RideTogether branding. |
@@ -332,7 +334,9 @@ See [Firebase setup](docs/FIREBASE_SETUP.md). Do not commit service accounts, pr
 
 ## Images and responsive layout
 
-- The main campus photo is **color**, while interface surfaces, controls and icons remain black/white/grey.
+- Editorial illustrations replace all photographs. Warm ochre, terracotta and pale teal artwork sits beside restrained black/white/grey controls.
+- Welcome art has a transparent background and is rendered directly on the white page: **no rounded frame, border, backdrop, or photo-label overlay**.
+- Matching illustration scenes appear in login, Home, posting, confirmations, empty states and chat; all bundled profile portraits are illustrated too.
 - Demo avatar is `assets/avatars/aarav.jpg`; changing the profile picture does not change the sample account's ID/name.
 - Existing saved canonical demo sessions normalize to the current demo image.
 - Onboarding benefits use **Wrap**, not an inflexible one-line Row.

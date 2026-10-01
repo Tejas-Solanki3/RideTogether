@@ -319,51 +319,42 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 7),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(23),
-          child: SizedBox(
-            height: 174,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  'assets/images/welcome_car.jpg',
-                  fit: BoxFit.cover,
-                  alignment: const Alignment(0, .6),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xEE000000), Color(0x33000000)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+        Surface(
+          padding: const EdgeInsets.fromLTRB(20, 15, 10, 17),
+          child: Row(
+            children: [
+              const Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Every seat\ncounts.',
+                      style: TextStyle(
+                        fontSize: 25,
+                        height: 1.13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -.8,
+                      ),
                     ),
-                  ),
-                ),
-                const Positioned(
-                  left: 20,
-                  top: 22,
-                  child: Text(
-                    'Every seat\ncounts.',
-                    style: TextStyle(
-                      fontSize: 27,
-                      height: 1.1,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1,
-                      color: Colors.white,
+                    SizedBox(height: 10),
+                    Text(
+                      'Same campus.\nBetter company.',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.muted,
+                        height: 1.7,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const Positioned(
-                  left: 20,
-                  bottom: 19,
-                  child: Text(
-                    'Same campus. Better company.',
-                    style: TextStyle(fontSize: 10, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                flex: 6,
+                child: AppIllustration('shared_ride', height: 160),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 18),

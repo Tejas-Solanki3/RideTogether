@@ -1,7 +1,7 @@
 name: ride_together
 description: A premium campus carpool matching app, built with Flutter, Riverpod and Firestore.
 publish_to: 'none'
-version: 2.0.1+3
+version: 2.1.0+4
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -27,7 +27,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/illustrations/
     - assets/avatars/
     - assets/svg/
     - assets/icons/

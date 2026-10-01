@@ -215,13 +215,26 @@ class _PostRideScreenState extends ConsumerState<PostRideScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    [
-                      'Where are\nyou headed?',
-                      'The little\ndetails.',
-                      'One last\nlook.',
-                    ][step],
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          [
+                            'Where are\nyou headed?',
+                            'The little\ndetails.',
+                            'One last\nlook.',
+                          ][step],
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      AppIllustration(
+                        step == 2 ? 'shared_ride' : 'find_your_people',
+                        width: 108,
+                        height: 94,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -619,11 +632,7 @@ class _Posted extends ConsumerWidget {
       const SizedBox(height: 40),
       const Align(
         alignment: Alignment.centerLeft,
-        child: CircleAvatar(
-          radius: 34,
-          backgroundColor: Colors.black,
-          child: AppIcon('check', size: 32, color: Colors.white),
-        ),
+        child: AppIllustration('shared_ride', width: 260, height: 155),
       ),
       const SizedBox(height: 25),
       Text(

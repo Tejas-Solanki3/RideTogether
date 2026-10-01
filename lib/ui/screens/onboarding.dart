@@ -114,49 +114,9 @@ class OnboardingScreen extends ConsumerWidget {
 
 class _WelcomeHero extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(28),
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          'assets/images/welcome_car.jpg',
-          fit: BoxFit.cover,
-          alignment: const Alignment(0, .5),
-        ),
-        Positioned(
-          left: 16,
-          bottom: 16,
-          right: 16,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(11),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppIcon('graduation-cap', size: 16),
-                  SizedBox(width: 7),
-                  Flexible(
-                    child: Text(
-                      'Your campus. Your people.',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
+  Widget build(BuildContext context) => const AppIllustration(
+    'welcome_people',
+    key: ValueKey('welcome_illustration'),
   );
 }
 
