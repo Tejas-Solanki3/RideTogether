@@ -1,0 +1,1 @@
+{"indexes":[{"collectionGroup":"rides","queryScope":"COLLECTION","fields":[{"fieldPath":"campusId","order":"ASCENDING"},{"fieldPath":"departureAt","order":"ASCENDING"}]},{"collectionGroup":"matches","queryScope":"COLLECTION","fields":[{"fieldPath":"participants","arrayConfig":"CONTAINS"},{"fieldPath":"departureAt","order":"ASCENDING"}]}],"fieldOverrides":[]}

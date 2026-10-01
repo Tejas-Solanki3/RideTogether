@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-01T05:23:00.090Z",
+  "app": "Compiled Flutter web release",
+  "checks": [
+    "Desktop Flutter app and assets load",
+    "Guided offer post persists a Ride",
+    "Driver fulfilment reserves seats and connects a request",
+    "Rider connection reserves one seat",
+    "Match chat sends and persists a message",
+    "Cancellation restores seats",
+    "Reload retains posts, matches and chat",
+    "Directional route filtering excludes the reverse route",
+    "390px mobile layout and bottom navigation work"
+  ],
+  "errors": []
+}
