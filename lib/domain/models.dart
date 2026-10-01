@@ -106,7 +106,7 @@ class Student {
     id: 'demo_ishaan',
     name: 'Ishaan Mehta',
     email: 'ishaan@greenfield.edu',
-    avatar: 'rohan',
+    avatar: 'aarav',
   );
 }
 

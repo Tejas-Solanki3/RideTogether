@@ -37,6 +37,21 @@ void main() {
     },
   );
   test(
+    'saved canonical demo profile uses aarav without discarding rides',
+    () async {
+      final saved =
+          jsonDecode(prefs.getString(DemoRideRepository.storageKey)!)
+              as Map<String, dynamic>;
+      (saved['student'] as Map<String, dynamic>)['avatar'] = 'rohan';
+      await prefs.setString(DemoRideRepository.storageKey, jsonEncode(saved));
+      final restored = DemoRideRepository(prefs);
+      expect((await restored.watchSession().first)?.avatar, 'aarav');
+      expect((await restored.watchSession().first)?.id, Student.demo.id);
+      expect((await restored.watchRides().first).length, 8);
+      restored.dispose();
+    },
+  );
+  test(
     'legacy automatic sessions are not restored, while ride data is retained',
     () async {
       final saved =

@@ -28,6 +28,8 @@ class DemoRideRepository implements RideRepository {
         _student = j['authFlowVersion'] == 2 && j['student'] != null
             ? Student.fromJson(j['student'])
             : null;
+        // Update the canonical demo picture on existing saved sessions too.
+        if (_student?.id == Student.demo.id) _student = Student.demo;
         for (final r in j['rides']) {
           final ride = Ride.fromJson(r);
           _rides[ride.id] = ride;

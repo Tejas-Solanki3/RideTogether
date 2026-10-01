@@ -74,6 +74,39 @@ void main() {
       ..addFont(rootBundle.load('assets/fonts/Manrope.ttf'));
     await loader.load();
   });
+  for (final size in [
+    const Size(280, 540),
+    const Size(299, 600),
+    const Size(320, 568),
+    const Size(360, 640),
+    const Size(390, 844),
+    const Size(480, 900),
+  ]) {
+    testWidgets(
+      'onboarding adapts without overflow at ${size.width.toInt()}x${size.height.toInt()}',
+      (tester) async {
+        final repo = await launch(
+          tester,
+          width: size.width,
+          height: size.height,
+          onboarded: false,
+          signedIn: false,
+        );
+        expect(find.text('Campus community'), findsOneWidget);
+        expect(find.text('Shared seats'), findsOneWidget);
+        expect(find.text('Your route'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        final slider = find.byKey(const ValueKey('get_started_slider'));
+        await tester.ensureVisible(slider);
+        await tester.pumpAndSettle();
+        await tester.drag(slider, Offset(size.width - 90, 0));
+        await tester.pumpAndSettle();
+        expect(find.text('Welcome\nback.'), findsOneWidget);
+        expect(await repo.watchSession().first, isNull);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   testWidgets(
     'first launch starts at welcome, never at an automatic demo session',
     (tester) async {

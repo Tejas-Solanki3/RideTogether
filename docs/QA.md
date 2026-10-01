@@ -7,7 +7,7 @@ Develop the mobile-first Flutter app in **Chrome** with `flutter run -d chrome`.
 ## Verified redesigned version
 
 - `flutter analyze`: clean.
-- **36 Flutter tests passed** (16 repository/auth/persistence, 9 domain/matching, 11 widget journeys/layout tests).
+- **43 Flutter tests passed** (17 repository/auth/persistence, 9 domain/matching, 17 widget journeys/layout tests).
 - Actual Chromium browser checks passed: short swipe resets, complete swipe opens login without authenticating, explicit email sign-in, Home/mobile navigation, Find/list/details, seat reservation, confirmation, chat send, cancellation restoration, offer publication, driver request fulfilment and sign-out.
 - Browser assertions observed the persisted demo records as well as visible Flutter controls.
 - Browser runtime errors: **none** in the checked journey.
@@ -41,3 +41,7 @@ python3 -m http.server 3000 --bind 0.0.0.0 --directory build/web
 No production Firebase project is configured by default. Demo mode is local to the browser and no other person is online in its chat. The prior Firestore rules suite has 16 passing emulator cases; those rule files were retained unchanged. A real two-account, two-device Firebase acceptance test remains a project-configuration step.
 
 No new APK, native-device test or native Figma file is claimed. The bulky HTML design exports and APK automation have been removed; only Flutter's minimal web bootstrap remains for Chrome support.
+
+## Narrow-onboarding regression
+
+The reported `251 px` content-width overflow is covered by a `299 × 600` viewport test (24 px padding on either side). Onboarding is additionally checked at 280×540, 320×568, 360×640, 390×844 and 480×900. Benefits wrap and compact windows scroll; no overflow exceptions are suppressed. The duplicate HTML viewport meta tag was removed.

@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "299x600: welcome, login and color demo avatar",
+    "280x540: welcome, login and color demo avatar",
+    "390x844: welcome, login and color demo avatar",
+    "1366x920: welcome, login and color demo avatar"
+  ],
+  "readmeDiagrams": 5,
+  "runtimeErrors": []
+}

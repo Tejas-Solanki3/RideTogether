@@ -4,29 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../domain/models.dart';
 import '../theme.dart';
 
-const monochrome = ColorFilter.matrix([
-  .2126,
-  .7152,
-  .0722,
-  0,
-  0,
-  .2126,
-  .7152,
-  .0722,
-  0,
-  0,
-  .2126,
-  .7152,
-  .0722,
-  0,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-]);
-
 class AppIcon extends StatelessWidget {
   final String name;
   final double size;
@@ -90,13 +67,10 @@ class Avatar extends StatelessWidget {
       child: ColoredBox(
         color: AppColors.surface,
         child: asset.isNotEmpty
-            ? ColorFiltered(
-                colorFilter: monochrome,
-                child: Image.asset(
-                  'assets/avatars/$asset.jpg',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, e, s) => _initials(),
-                ),
+            ? Image.asset(
+                'assets/avatars/$asset.jpg',
+                fit: BoxFit.cover,
+                errorBuilder: (_, e, s) => _initials(),
               )
             : _initials(),
       ),
