@@ -4,225 +4,165 @@ import '../../domain/models.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import 'common.dart';
+import '../screens/ride_details.dart';
 
 class RideCard extends ConsumerWidget {
   final Ride ride;
-  final bool bestMatch;
-  final VoidCallback onView;
-  const RideCard({
-    super.key,
-    required this.ride,
-    required this.onView,
-    this.bestMatch = false,
-  });
+  const RideCard(this.ride, {super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final saved = ref.watch(savedRidesProvider).contains(ride.id);
-    final driver = ride.kind == RideKind.offer;
+    final saved = ref.watch(savedRidesProvider).contains(ride.id),
+        offer = ride.kind == RideKind.offer;
     return Card(
+      elevation: 0,
+      color: Colors.white,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(23)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final small = constraints.maxWidth < 470;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Avatar(
-                      name: ride.ownerName,
-                      asset: ride.ownerAvatar,
-                      size: 43,
+                Avatar(name: ride.ownerName, asset: ride.ownerAvatar, size: 43),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ride.ownerName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        offer ? ride.vehicle : 'Looking for a campus lift',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: saved ? 'Unsave ride' : 'Save ride',
+                  onPressed: () =>
+                      ref.read(savedRidesProvider.notifier).toggle(ride.id),
+                  icon: AppIcon(
+                    'bookmark',
+                    size: 20,
+                    color: saved ? Colors.white : Colors.black,
+                  ),
+                  style: IconButton.styleFrom(
+                    backgroundColor: saved
+                        ? Colors.black
+                        : AppColors.background,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(width: 11),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  ride.ownerName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              if (!small) ...[
-                                const SizedBox(width: 9),
-                                RoleBadge(driver: driver),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            driver ? ride.vehicle : 'Looking for a campus ride',
-                            style: const TextStyle(
-                              color: AppColors.muted,
-                              fontSize: 11,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                  padding: const EdgeInsets.all(10),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            RoleBadge(driver: offer),
+            const SizedBox(height: 14),
+            RouteSummary(
+              originId: ride.originId,
+              destinationId: ride.destinationId,
+            ),
+            const SizedBox(height: 17),
+            Row(
+              children: [
+                Expanded(
+                  child: Meta('calendar-days', dateLabel(ride.departureAt)),
+                ),
+                Expanded(child: Meta('clock-3', timeLabel(ride.departureAt))),
+                Expanded(
+                  child: Meta(
+                    'armchair',
+                    '${ride.availableSeats} ${offer ? 'seats left' : 'needed'}',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ride.contribution == 0
+                            ? 'Free'
+                            : '₹${ride.contribution}',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -.7,
+                        ),
+                      ),
+                      Text(
+                        offer
+                            ? 'per seat · suggested fuel'
+                            : 'suggested per seat',
+                        style: const TextStyle(
+                          fontSize: 8,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 146,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 46),
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => RideDetailsScreen(rideId: ride.id),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          ride.contribution == 0
-                              ? (driver ? 'Free' : '₹0')
-                              : '₹${ride.contribution}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -.7,
-                          ),
+                          offer ? 'View ride' : 'View request',
+                          style: const TextStyle(fontSize: 11),
                         ),
-                        Text(
-                          driver ? 'per seat' : 'suggested / seat',
-                          style: const TextStyle(
-                            color: AppColors.muted,
-                            fontSize: 9,
-                          ),
+                        const SizedBox(width: 10),
+                        const AppIcon(
+                          'arrow-right',
+                          size: 16,
+                          color: Colors.white,
                         ),
                       ],
                     ),
-                    const SizedBox(width: 2),
-                    IconButton(
-                      tooltip: saved ? 'Unsave ride' : 'Save ride',
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 36,
-                      ),
-                      padding: const EdgeInsets.all(6),
-                      onPressed: () =>
-                          ref.read(savedRidesProvider.notifier).toggle(ride.id),
-                      icon: Icon(
-                        saved
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded,
-                        size: 20,
-                        color: saved ? AppColors.green : AppColors.muted,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                if (small) ...[
-                  const SizedBox(height: 10),
-                  RoleBadge(driver: driver),
-                ],
-                const SizedBox(height: 20),
-                RouteRow(
-                  origin: ride.origin,
-                  destination: ride.destination,
-                  vertical: small,
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 14),
-                if (small) ...[
-                  Wrap(
-                    spacing: 14,
-                    runSpacing: 8,
-                    children: [
-                      InfoItem(
-                        Icons.calendar_today_outlined,
-                        dateLabel(ride.departureAt),
-                      ),
-                      InfoItem(
-                        Icons.schedule_rounded,
-                        timeLabel(ride.departureAt),
-                      ),
-                      InfoItem(
-                        Icons.airline_seat_recline_normal_rounded,
-                        '${ride.availableSeats} ${ride.availableSeats == 1 ? 'seat' : 'seats'} ${driver ? 'left' : 'needed'}',
-                        color: ride.availableSeats == 1 && driver
-                            ? AppColors.green
-                            : AppColors.muted,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      if (bestMatch)
-                        const Expanded(child: _BestMatch())
-                      else
-                        const Spacer(),
-                      PrimaryButton(
-                        label: driver ? 'View ride' : 'View request',
-                        onPressed: onView,
-                      ),
-                    ],
-                  ),
-                ] else
-                  Row(
-                    children: [
-                      InfoItem(
-                        Icons.calendar_today_outlined,
-                        dateLabel(ride.departureAt),
-                      ),
-                      const SizedBox(width: 15),
-                      InfoItem(
-                        Icons.schedule_rounded,
-                        timeLabel(ride.departureAt),
-                      ),
-                      const SizedBox(width: 15),
-                      InfoItem(
-                        Icons.airline_seat_recline_normal_rounded,
-                        '${ride.availableSeats} ${ride.availableSeats == 1 ? 'seat' : 'seats'} ${driver ? 'left' : 'needed'}',
-                        color: ride.availableSeats == 1 && driver
-                            ? AppColors.green
-                            : AppColors.muted,
-                      ),
-                      const Spacer(),
-                      PrimaryButton(
-                        label: driver ? 'View ride' : 'View request',
-                        onPressed: onView,
-                      ),
-                    ],
-                  ),
-                if (bestMatch && !small) ...[
-                  const SizedBox(height: 11),
-                  const _BestMatch(),
-                ],
               ],
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
   }
-}
-
-class _BestMatch extends StatelessWidget {
-  const _BestMatch();
-  @override
-  Widget build(BuildContext context) => const Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(Icons.bolt_rounded, size: 13, color: AppColors.green),
-      SizedBox(width: 4),
-      Flexible(
-        child: Text(
-          'Earliest on your route',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: AppColors.green,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    ],
-  );
 }

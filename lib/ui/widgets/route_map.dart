@@ -1,142 +1,137 @@
-import 'dart:ui' as ui;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../domain/models.dart';
-import '../theme.dart';
 
-/// A custom, self-contained campus illustration; not a GPS/navigation service.
+/// An original illustrative campus map. No live GPS or navigation claim.
 class RouteMap extends StatelessWidget {
   final String originId, destinationId;
   final double height;
-  final bool labels;
   const RouteMap({
     super.key,
     required this.originId,
     required this.destinationId,
-    this.height = 230,
-    this.labels = true,
+    this.height = 160,
   });
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(14),
+    borderRadius: BorderRadius.circular(20),
     child: SizedBox(
       height: height,
       width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          SvgPicture.asset('assets/svg/campus_map.svg', fit: BoxFit.fill),
-          CustomPaint(
-            painter: _RoutePainter(
-              CampusPlace.byId(originId),
-              CampusPlace.byId(destinationId),
-              labels,
-            ),
-          ),
-          Positioned(
-            right: 10,
-            top: 10,
-            child: Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.explore_outlined,
-                size: 18,
-                color: AppColors.muted,
-              ),
-            ),
-          ),
-        ],
+      child: CustomPaint(
+        painter: _MapPainter(
+          CampusPlace.byId(originId),
+          CampusPlace.byId(destinationId),
+        ),
       ),
     ),
   );
 }
 
-class _RoutePainter extends CustomPainter {
-  final CampusPlace origin, destination;
-  final bool labels;
-  _RoutePainter(this.origin, this.destination, this.labels);
+class _MapPainter extends CustomPainter {
+  final CampusPlace a, b;
+  _MapPainter(this.a, this.b);
   @override
   void paint(Canvas canvas, Size size) {
-    final a = Offset(origin.x * size.width, origin.y * size.height);
-    final b = Offset(destination.x * size.width, destination.y * size.height);
-    final bendX = (a.dx + b.dx) / 2;
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = const Color(0xFFEDEDED),
+    );
+    final gap = math.min(9.0, math.min(size.width / 6, size.height / 3) * .18);
+    final block = Paint()..color = const Color(0xFFE1E1E1);
+    for (var x = 0; x < 7; x++) {
+      for (var y = 0; y < 4; y++) {
+        final rect = Rect.fromLTWH(
+          x * size.width / 6 + gap,
+          y * size.height / 3 + gap,
+          size.width / 6 - gap * 2,
+          size.height / 3 - gap * 2,
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(4)),
+          block,
+        );
+      }
+    }
+    final roads = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 12;
+    canvas.drawLine(
+      Offset(0, size.height * .49),
+      Offset(size.width, size.height * .49),
+      roads,
+    );
+    canvas.drawLine(
+      Offset(size.width * .48, 0),
+      Offset(size.width * .48, size.height),
+      roads,
+    );
+    final from = Offset(a.x * size.width, a.y * size.height);
+    final to = Offset(b.x * size.width, b.y * size.height);
     final path = Path()
-      ..moveTo(a.dx, a.dy)
-      ..lineTo(bendX - 16, a.dy)
-      ..quadraticBezierTo(bendX, a.dy, bendX, a.dy - 16)
-      ..lineTo(bendX, b.dy + 16)
-      ..quadraticBezierTo(bendX, b.dy, bendX + 16, b.dy)
-      ..lineTo(b.dx, b.dy);
+      ..moveTo(from.dx, from.dy)
+      ..lineTo(size.width * .48, from.dy)
+      ..lineTo(size.width * .48, to.dy)
+      ..lineTo(to.dx, to.dy);
     canvas.drawPath(
       path,
       Paint()
         ..color = Colors.white
-        ..style = PaintingStyle.stroke
         ..strokeWidth = 8
+        ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
+        ..style = PaintingStyle.stroke,
     );
     canvas.drawPath(
       path,
       Paint()
-        ..color = AppColors.green
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4
+        ..color = Colors.black
+        ..strokeWidth = 3.5
+        ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
+        ..style = PaintingStyle.stroke,
     );
-    for (final point in [a, b]) {
-      canvas.drawCircle(
-        point,
-        12,
-        Paint()..color = AppColors.green.withValues(alpha: .12),
-      );
-      canvas.drawCircle(point, 7, Paint()..color = Colors.white);
-      canvas.drawCircle(point, 4, Paint()..color = AppColors.ink);
+    for (final point in [from, to]) {
+      canvas.drawCircle(point, 8, Paint()..color = Colors.white);
+      canvas.drawCircle(point, 4, Paint()..color = Colors.black);
     }
-    if (labels) {
-      _label(canvas, size, a, origin.name);
-      _label(canvas, size, b, destination.name);
-    }
-  }
-
-  void _label(Canvas canvas, Size size, Offset point, String label) {
-    final p = TextPainter(
-      text: TextSpan(
-        text: label,
-        style: const TextStyle(
-          fontFamily: 'Manrope',
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          color: AppColors.ink,
+    void label(String text, Offset point) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: const TextStyle(
+            fontFamily: 'Manrope',
+            fontSize: 8,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
         ),
-      ),
-      textDirection: ui.TextDirection.ltr,
-    )..layout(maxWidth: size.width - 24);
-    final w = p.width + 18, h = p.height + 12;
-    final x = (point.dx - w / 2).clamp(8.0, size.width - w - 8.0);
-    final y = (point.dy + 17).clamp(8.0, size.height - h - 8.0);
-    final rect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(x, y, w, h),
-      const Radius.circular(7),
-    );
-    canvas.drawShadow(
-      Path()..addRRect(rect),
-      AppColors.ink.withValues(alpha: .1),
-      3,
-      false,
-    );
-    canvas.drawRRect(rect, Paint()..color = Colors.white);
-    p.paint(canvas, Offset(x + 9, y + 6));
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: size.width * .38);
+      final x = (point.dx - painter.width / 2)
+          .clamp(8.0, math.max(8.0, size.width - painter.width - 8))
+          .toDouble();
+      final y = (point.dy + 14)
+          .clamp(7.0, math.max(7.0, size.height - painter.height - 9))
+          .toDouble();
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x - 6, y - 4, painter.width + 12, painter.height + 8),
+          const Radius.circular(5),
+        ),
+        Paint()..color = Colors.white,
+      );
+      painter.paint(canvas, Offset(x, y));
+    }
+
+    if (size.height >= 90 && size.width >= 180) {
+      label(a.name, from);
+      label(b.name, to);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _RoutePainter oldDelegate) =>
-      oldDelegate.origin != origin ||
-      oldDelegate.destination != destination ||
-      oldDelegate.labels != labels;
+  bool shouldRepaint(covariant _MapPainter old) =>
+      old.a.id != a.id || old.b.id != b.id;
 }

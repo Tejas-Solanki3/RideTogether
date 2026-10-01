@@ -22,7 +22,9 @@ class FirebaseConfig {
       appId: appId,
       messagingSenderId: senderId,
       projectId: projectId,
-      authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN'),
+      authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN') == ''
+          ? null
+          : String.fromEnvironment('FIREBASE_AUTH_DOMAIN'),
       storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
     );
   }

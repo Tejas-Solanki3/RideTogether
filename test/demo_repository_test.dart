@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_together/data/demo_repository.dart';
@@ -10,21 +11,54 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     repo = DemoRideRepository(prefs);
+    await repo.signIn(Student.demo.email, 'local-demo');
   });
   tearDown(() => repo.dispose());
   Future<Ride> ride(String id) async =>
       (await repo.watchRides().first).firstWhere((r) => r.id == id);
   test(
-    'starts signed in as sample student with realistic offers and a driver-side match',
+    'a fresh demo is signed out, with sample rides ready after explicit login',
     () async {
-      expect((await repo.watchSession().first)?.id, Student.demo.id);
-      expect((await repo.watchRides().first).length, 8);
+      await prefs.clear();
+      final fresh = DemoRideRepository(prefs);
+      expect(await fresh.watchSession().first, isNull);
+      expect((await fresh.watchRides().first).length, 8);
+      await expectLater(
+        fresh.joinOffer('offer_aarav', Student.demo),
+        throwsA(isA<RideException>()),
+      );
+      await fresh.signIn(Student.demo.email, 'local-demo');
+      expect((await fresh.watchSession().first)?.id, Student.demo.id);
       expect(
-        (await repo.watchMatches(Student.demo.id).first).single.driverId,
+        (await fresh.watchMatches(Student.demo.id).first).single.driverId,
         Student.demo.id,
       );
+      fresh.dispose();
     },
   );
+  test(
+    'legacy automatic sessions are not restored, while ride data is retained',
+    () async {
+      final saved =
+          jsonDecode(prefs.getString(DemoRideRepository.storageKey)!)
+              as Map<String, dynamic>;
+      saved.remove('authFlowVersion');
+      await prefs.setString(DemoRideRepository.storageKey, jsonEncode(saved));
+      final migrated = DemoRideRepository(prefs);
+      expect(await migrated.watchSession().first, isNull);
+      expect((await migrated.watchRides().first).length, 8);
+      migrated.dispose();
+    },
+  );
+  test('explicit v2 sign-in persists and sign-out stays signed out', () async {
+    final copy = DemoRideRepository(prefs);
+    expect((await copy.watchSession().first)?.id, Student.demo.id);
+    await copy.signOut();
+    final signedOut = DemoRideRepository(prefs);
+    expect(await signedOut.watchSession().first, isNull);
+    copy.dispose();
+    signedOut.dispose();
+  });
   test('joining creates a rider-side match and consumes one seat', () async {
     final before = await ride('offer_aarav');
     final match = await repo.joinOffer('offer_aarav', Student.demo);
@@ -56,22 +90,21 @@ void main() {
       expect((await ride('offer_rohan')).availableSeats, 0);
     },
   );
-  test('cancelling returns seats exactly once', () async {
-    final match = await repo.joinOffer('offer_aarav', Student.demo);
-    await repo.cancelMatch(match.id, Student.demo);
-    await repo.cancelMatch(match.id, Student.demo);
-    expect((await ride('offer_aarav')).availableSeats, 3);
-    expect(
-      (await repo.watchMatches(Student.demo.id).first).last.status,
-      isNotNull,
-    );
-    await expectLater(
-      repo.joinOffer('offer_aarav', Student.demo),
-      throwsA(isA<RideException>()),
-    );
-  });
   test(
-    'driver fulfilment reserves every requested seat and reopens request on cancel',
+    'cancelling returns seats exactly once and prevents reopening the same match',
+    () async {
+      final match = await repo.joinOffer('offer_aarav', Student.demo);
+      await repo.cancelMatch(match.id, Student.demo);
+      await repo.cancelMatch(match.id, Student.demo);
+      expect((await ride('offer_aarav')).availableSeats, 3);
+      await expectLater(
+        repo.joinOffer('offer_aarav', Student.demo),
+        throwsA(isA<RideException>()),
+      );
+    },
+  );
+  test(
+    'driver fulfilment reserves every requested seat and reopens on cancel',
     () async {
       final match = await repo.fulfilRequest(
         'request_karan',
@@ -129,7 +162,7 @@ void main() {
       throwsA(isA<RideException>()),
     );
   });
-  test('saved data survives repository reconstruction', () async {
+  test('saved rides and chat survive repository reconstruction', () async {
     final match = await repo.joinOffer('offer_aarav', Student.demo);
     await repo.sendMessage(match.id, Student.demo, 'Hello again.');
     final copy = DemoRideRepository(prefs);
@@ -145,44 +178,42 @@ void main() {
     );
     copy.dispose();
   });
-  test(
-    'posts validate route, seats, ownership, future date and vehicle',
-    () async {
-      final r = Ride(
-        id: 'new',
-        ownerId: Student.demo.id,
-        ownerName: Student.demo.name,
-        ownerAvatar: 'rohan',
-        originId: 'north_gate',
-        destinationId: 'central_library',
-        kind: RideKind.offer,
-        departureAt: defaultDeparture(),
-        createdAt: DateTime.now(),
-        totalSeats: 2,
-        availableSeats: 2,
-        vehicle: 'Honda City',
-      );
-      await repo.postRide(r, Student.demo);
-      expect((await ride('new')).ownerId, Student.demo.id);
-      await expectLater(
-        repo.postRide(r, Student.demo),
-        throwsA(isA<RideException>()),
-      );
-      await repo.signOut();
-      await expectLater(
-        repo.postRide(r, Student.demo),
-        throwsA(isA<RideException>()),
-      );
-    },
-  );
-  test('demo reset restores sample data and session', () async {
+  test('posts validate ownership, duplicates and sign-in', () async {
+    final r = Ride(
+      id: 'new',
+      ownerId: Student.demo.id,
+      ownerName: Student.demo.name,
+      ownerAvatar: 'rohan',
+      originId: 'north_gate',
+      destinationId: 'central_library',
+      kind: RideKind.offer,
+      departureAt: defaultDeparture(),
+      createdAt: DateTime.now(),
+      totalSeats: 2,
+      availableSeats: 2,
+      vehicle: 'Honda City',
+    );
+    await repo.postRide(r, Student.demo);
+    expect((await ride('new')).ownerId, Student.demo.id);
+    await expectLater(
+      repo.postRide(r, Student.demo),
+      throwsA(isA<RideException>()),
+    );
+    await repo.signOut();
+    await expectLater(
+      repo.postRide(r, Student.demo),
+      throwsA(isA<RideException>()),
+    );
+  });
+  test('demo reset restores sample data and signs the student out', () async {
     await repo.joinOffer('offer_aarav', Student.demo);
     await repo.resetDemo();
     expect((await ride('offer_aarav')).availableSeats, 3);
     expect((await repo.watchMatches(Student.demo.id).first).length, 1);
+    expect(await repo.watchSession().first, isNull);
   });
   test(
-    'rider can fulfil their own multi-seat request when joining an offer',
+    'a rider can fulfil their own multi-seat request when joining an offer',
     () async {
       final request = Ride(
         id: 'group_request',

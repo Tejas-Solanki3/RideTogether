@@ -24,7 +24,10 @@ class DemoRideRepository implements RideRepository {
     if (saved != null) {
       try {
         final j = jsonDecode(saved) as Map<String, dynamic>;
-        _student = j['student'] == null ? null : Student.fromJson(j['student']);
+        // v1 opened automatically as a sample account. v2 requires an explicit login.
+        _student = j['authFlowVersion'] == 2 && j['student'] != null
+            ? Student.fromJson(j['student'])
+            : null;
         for (final r in j['rides']) {
           final ride = Ride.fromJson(r);
           _rides[ride.id] = ride;
@@ -48,7 +51,7 @@ class DemoRideRepository implements RideRepository {
   @override
   bool get isDemo => true;
   void _seed() {
-    _student = Student.demo;
+    _student = null;
     _rides.clear();
     _matches.clear();
     _messages.clear();
@@ -199,6 +202,7 @@ class DemoRideRepository implements RideRepository {
     final saved = await prefs.setString(
       storageKey,
       jsonEncode({
+        'authFlowVersion': 2,
         'student': _student?.toJson(),
         'rides': _rides.values.map((r) => r.toJson()).toList(),
         'matches': _matches.values.map((m) => m.toJson()).toList(),

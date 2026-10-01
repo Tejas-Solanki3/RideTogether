@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config/firebase_config.dart';
@@ -14,6 +15,14 @@ import 'ui/shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
   try {
     final prefs = await SharedPreferences.getInstance();
     final RideRepository repository;
@@ -73,9 +82,18 @@ class RideTogetherApp extends StatelessWidget {
   const RideTogetherApp({super.key});
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'RideTogether — Your campus, connected.',
+    title: 'RideTogether',
     debugShowCheckedModeBanner: false,
     theme: buildTheme(),
+    builder: (context, child) => ColoredBox(
+      color: const Color(0xFFE9E9E9),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: child ?? const SizedBox(),
+        ),
+      ),
+    ),
     home: const AppShell(),
     scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
   );

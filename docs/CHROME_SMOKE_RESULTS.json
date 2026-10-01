@@ -1,0 +1,16 @@
+{
+  "target": "Flutter app running in Chrome",
+  "checks": [
+    "Real short/complete swipe behaviour",
+    "Login-first entry and explicit email sign-in",
+    "Home and mobile navigation",
+    "Directional Find Ride list",
+    "Live one-seat reservation and confirmation",
+    "Persistent private demo chat",
+    "Cancellation restores seats",
+    "Three-step offer posting",
+    "Driver request fulfilment",
+    "Profile sign-out returns to login"
+  ],
+  "errors": []
+}

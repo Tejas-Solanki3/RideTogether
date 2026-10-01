@@ -4,7 +4,7 @@ import '../data/ride_repository.dart';
 import '../domain/matching.dart';
 import '../domain/models.dart';
 
-enum AppTab { find, post, matches }
+enum AppTab { find, post, matches, profile }
 
 final repositoryProvider = Provider<RideRepository>(
   (ref) => throw UnimplementedError('Override in main'),
@@ -101,3 +101,24 @@ final clockProvider = StreamProvider<DateTime>((ref) async* {
     (_) => DateTime.now(),
   );
 });
+
+// First-launch UX is separate from authentication and never signs a student in.
+final onboardingProvider = StateNotifierProvider<OnboardingNotifier, bool>(
+  (ref) => OnboardingNotifier(ref.watch(preferencesProvider)),
+);
+
+class OnboardingNotifier extends StateNotifier<bool> {
+  final SharedPreferences prefs;
+  OnboardingNotifier(this.prefs)
+    : super(prefs.getBool('android_onboarding_v2') ?? false);
+  Future<void> complete() async {
+    if (!await prefs.setBool('android_onboarding_v2', true)) {
+      throw const RideException(
+        'Could not save your preference. Please try again.',
+      );
+    }
+    state = true;
+  }
+
+  void showWelcome() => state = false;
+}

@@ -1,116 +1,115 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const ink = Color(0xFF18221C);
-  static const green = Color(0xFF2C6B4B);
-  static const sage = Color(0xFFEAF2E8);
-  static const background = Color(0xFFF7F8F5);
-  static const muted = Color(0xFF68736B);
-  static const line = Color(0xFFE7EBE4);
-  static const blue = Color(0xFF496B88);
-  static const blueLight = Color(0xFFEDF2F7);
-  static const red = Color(0xFFAD4545);
+  static const ink = Color(0xFF000000);
+  static const white = Color(0xFFFFFFFF);
+  static const background = Color(0xFFF6F6F6);
+  static const surface = Color(0xFFF0F0F0);
+  static const muted = Color(0xFF666666);
+  static const line = Color(0xFFE7E7E7);
 }
 
 ThemeData buildTheme() {
-  final scheme = ColorScheme.fromSeed(
-    seedColor: AppColors.green,
-    brightness: Brightness.light,
+  const scheme = ColorScheme.light(
     primary: AppColors.ink,
-    secondary: AppColors.green,
+    onPrimary: Colors.white,
+    secondary: AppColors.ink,
+    onSecondary: Colors.white,
     surface: Colors.white,
+    onSurface: AppColors.ink,
+    error: AppColors.ink,
+    onError: Colors.white,
+    outline: AppColors.line,
+    surfaceTint: Colors.transparent,
   );
   return ThemeData(
     useMaterial3: true,
+    fontFamily: 'Manrope',
     colorScheme: scheme,
     scaffoldBackgroundColor: AppColors.background,
-    fontFamily: 'Manrope',
     textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 50,
+      displaySmall: TextStyle(
+        fontSize: 34,
         fontWeight: FontWeight.w800,
         height: 1.12,
-        letterSpacing: -2,
-        color: AppColors.ink,
-      ),
-      displayMedium: TextStyle(
-        fontSize: 38,
-        fontWeight: FontWeight.w800,
-        height: 1.17,
-        letterSpacing: -1.4,
+        letterSpacing: -1.1,
         color: AppColors.ink,
       ),
       headlineMedium: TextStyle(
-        fontSize: 26,
+        fontSize: 29,
         fontWeight: FontWeight.w800,
-        letterSpacing: -.7,
-        color: AppColors.ink,
+        height: 1.15,
+        letterSpacing: -.9,
       ),
       titleLarge: TextStyle(
-        fontSize: 21,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -.4,
-        color: AppColors.ink,
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -.45,
       ),
       titleMedium: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: AppColors.ink,
-      ),
-      bodyLarge: TextStyle(
         fontSize: 15,
-        fontWeight: FontWeight.w500,
-        color: AppColors.ink,
-        height: 1.55,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: AppColors.ink,
-        height: 1.5,
-      ),
-      bodySmall: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-        color: AppColors.muted,
-        height: 1.5,
-      ),
-      labelLarge: TextStyle(
-        fontSize: 13,
         fontWeight: FontWeight.w700,
-        letterSpacing: 0,
+        height: 1.4,
       ),
+      bodyLarge: TextStyle(fontSize: 14, height: 1.6),
+      bodyMedium: TextStyle(fontSize: 13, height: 1.6),
+      bodySmall: TextStyle(fontSize: 11, height: 1.5, color: AppColors.muted),
     ),
-    cardTheme: CardThemeData(
-      color: Colors.white,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.line),
+      foregroundColor: AppColors.ink,
+      centerTitle: true,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.background,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 19),
+      labelStyle: const TextStyle(fontSize: 12, color: AppColors.muted),
+      hintStyle: const TextStyle(fontSize: 13, color: AppColors.muted),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
       ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.black, width: 1.25),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.black, width: 1.5),
+      ),
+      errorStyle: const TextStyle(color: AppColors.ink, fontSize: 11),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.ink,
         foregroundColor: Colors.white,
-        minimumSize: const Size(0, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: const Size(0, 56),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         textStyle: const TextStyle(
           fontFamily: 'Manrope',
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w700,
         ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.ink,
-        minimumSize: const Size(0, 46),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+        minimumSize: const Size(0, 54),
         side: const BorderSide(color: AppColors.line),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         textStyle: const TextStyle(
           fontFamily: 'Manrope',
           fontSize: 13,
@@ -120,74 +119,48 @@ ThemeData buildTheme() {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.green,
+        foregroundColor: AppColors.ink,
         textStyle: const TextStyle(
           fontFamily: 'Manrope',
+          fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
       ),
     ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: AppColors.background,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.line),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.line),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.green, width: 1.5),
-      ),
-      labelStyle: const TextStyle(color: AppColors.muted, fontSize: 13),
-      hintStyle: const TextStyle(color: AppColors.muted, fontSize: 13),
+    checkboxTheme: CheckboxThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      side: const BorderSide(color: AppColors.ink, width: 1.3),
     ),
-    dividerTheme: const DividerThemeData(
-      color: AppColors.line,
-      thickness: 1,
-      space: 1,
-    ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(foregroundColor: AppColors.ink),
-    ),
-    bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.ink,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      contentTextStyle: const TextStyle(
+        fontFamily: 'Manrope',
+        color: Colors.white,
+        fontSize: 12,
       ),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
-    snackBarTheme: SnackBarThemeData(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.ink,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      contentTextStyle: const TextStyle(
-        fontFamily: 'Manrope',
-        color: Colors.white,
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      showDragHandle: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
     ),
-    datePickerTheme: DatePickerThemeData(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.line,
+      thickness: 1,
+      space: 24,
     ),
-    navigationBarTheme: const NavigationBarThemeData(
-      backgroundColor: Colors.white,
-      indicatorColor: AppColors.sage,
-      height: 72,
-      labelTextStyle: WidgetStatePropertyAll(
-        TextStyle(
-          fontFamily: 'Manrope',
-          fontWeight: FontWeight.w700,
-          fontSize: 11,
-        ),
-      ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: AppColors.ink,
     ),
   );
 }

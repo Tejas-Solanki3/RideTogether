@@ -7,13 +7,13 @@
 | Logged-in student | Demo session adapter; Firebase Email/Password + verification | A runnable credential-free prototype, with a separate real auth path. Verified email is not advertised as an identity check. |
 | Post offer/request | Immutable Dart `Ride`, `Form`, three steps, repository `postRide` | Typed records, validation close to input, clear progress, no accidental publication before review. |
 | Find Ride | `ListView.separated` + `Card`, route/day/role filters | Familiar scanning of origin, destination, date, time and seats on every offer; requests honestly show needed seats. |
-| Material 3 roles | Global seed theme, text/icon + green driver badge or blue rider badge | Roles remain understandable without relying on colour alone. |
+| Material 3 roles | Global seed theme, text/icon + filled/neutral driver/rider badge | Roles remain understandable without relying on colour alone. |
 | Live list in Riverpod | Stream providers → `matchingRidesProvider` + immutable `RideFilters` | One source of truth; a Firestore snapshot updates cards, details, own posts and matches consistently. |
 | Cloud Firestore storage | `FirestoreRideRepository`, rules and indexes | No Firebase-specific code in the UI; backend swap is a bootstrap override. |
 | Seat decrement | Transaction spanning offer, match, and optionally request | Read current capacity; reserve all seats or fail; concurrent last-seat joins cannot both succeed. |
 | My Matches, both sides | `participants` array-contains query; `isDriver(uid)` | One model supports driver/rider perspectives and private access. |
-| Responsive journey | Sidebar ≥1024px, bottom navigation otherwise, scrollable cards/forms/dialogs | Desktop uses space for a route aside; mobile keeps primary actions and guided progress accessible. |
-| Figma flow | 19 SVG artboards + flow map + native import plugin | Editable and portable handoff without pretending that a native Figma file was created in an inaccessible account. |
+| Responsive journey | Mobile navigation capsule, centered app canvas in Chrome, scrollable cards/forms/dialogs | A single mobile-first layout keeps primary actions and guided progress accessible in Chrome. |
+| Figma flow | Original kit was separated/removed; current iteration focuses on Flutter Chrome UI | No large embedded HTML design exports are bundled in the app repository. |
 
 ## Layers
 

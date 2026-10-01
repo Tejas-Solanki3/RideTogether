@@ -4,7 +4,9 @@ import '../../domain/models.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
-import '../widgets/ride_panels.dart';
+import 'chat.dart';
+import 'find_ride.dart';
+import 'ride_details.dart';
 
 class MyMatchesScreen extends ConsumerStatefulWidget {
   const MyMatchesScreen({super.key});
@@ -13,608 +15,462 @@ class MyMatchesScreen extends ConsumerStatefulWidget {
 }
 
 class _MyMatchesScreenState extends ConsumerState<MyMatchesScreen> {
-  String role = 'All rides';
+  bool? driverFilter;
   @override
   Widget build(BuildContext context) {
-    final student = ref.watch(currentStudentProvider);
-    final data = ref.watch(matchesProvider), posts = ref.watch(myPostsProvider);
-    final section = ref.watch(matchesSectionProvider);
-    final all = data.valueOrNull ?? [], ownPosts = posts.valueOrNull ?? [];
+    final section = ref.watch(matchesSectionProvider),
+        uid = ref.watch(currentStudentProvider)?.id ?? '';
+    final all = ref.watch(matchesProvider);
+    final posts = ref.watch(myPostsProvider);
     final now = ref.watch(clockProvider).valueOrNull ?? DateTime.now();
-    final upcoming = all
+    final connections = (all.valueOrNull ?? []).where((m) {
+      if (driverFilter != null && (m.driverId == uid) != driverFilter) {
+        return false;
+      }
+      return switch (section) {
+        MatchesSection.cancelled => m.status == MatchStatus.cancelled,
+        MatchesSection.past =>
+          m.status == MatchStatus.confirmed && !m.departureAt.isAfter(now),
+        _ => m.status == MatchStatus.confirmed && m.departureAt.isAfter(now),
+      };
+    }).toList();
+    final upcoming = (all.valueOrNull ?? [])
         .where(
           (m) =>
               m.status == MatchStatus.confirmed && m.departureAt.isAfter(now),
         )
-        .toList();
-    final seatsShared = all
-        .where(
-          (m) => m.status == MatchStatus.confirmed && m.driverId == student?.id,
-        )
-        .fold<int>(0, (n, m) => n + m.seats);
-    final cancelled = all
-        .where((m) => m.status == MatchStatus.cancelled)
-        .toList();
-    final past = all
-        .where(
-          (m) =>
-              m.status == MatchStatus.confirmed && !m.departureAt.isAfter(now),
-        )
-        .toList();
-    final list = switch (section) {
-      MatchesSection.upcoming => upcoming,
-      MatchesSection.past => past,
-      MatchesSection.cancelled => cancelled,
-      _ => <RideMatch>[],
-    };
-    final filtered = list
-        .where(
-          (m) =>
-              role == 'All rides' ||
-              (role == 'As a driver'
-                  ? m.isDriver(student?.id ?? '')
-                  : !m.isDriver(student?.id ?? '')),
-        )
-        .toList();
-    return LayoutBuilder(
-      builder: (context, c) {
-        final mobile = c.maxWidth < 650;
-        return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            mobile ? 20 : 36,
-            31,
-            mobile ? 20 : 36,
-            40,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1150),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Eyebrow('Your campus connections'),
-                  const SizedBox(height: 11),
-                  Text(
-                    'Your rides. Your people.',
-                    style: mobile
-                        ? Theme.of(context).textTheme.headlineMedium
-                        : Theme.of(context).textTheme.displayMedium,
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'From the first hello to the last drop-off, it’s all here.',
-                    style: TextStyle(color: AppColors.muted, fontSize: 13),
-                  ),
-                  const SizedBox(height: 27),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _Stat(
-                          icon: Icons.route_outlined,
-                          value: '${upcoming.length}',
-                          label: 'Upcoming rides',
-                          dark: true,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _Stat(
-                          icon: Icons.airline_seat_recline_normal,
-                          value: '$seatsShared',
-                          label: 'Seats shared',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _Stat(
-                          icon: Icons.edit_note_outlined,
-                          value: '${ownPosts.length}',
-                          label: 'Your posts',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 27),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        SelectionPill(
-                          label: 'Upcoming · ${upcoming.length}',
-                          selected: section == MatchesSection.upcoming,
-                          onTap: () =>
-                              ref.read(matchesSectionProvider.notifier).state =
-                                  MatchesSection.upcoming,
-                        ),
-                        const SizedBox(width: 8),
-                        SelectionPill(
-                          label: 'My posts · ${ownPosts.length}',
-                          selected: section == MatchesSection.posts,
-                          onTap: () =>
-                              ref.read(matchesSectionProvider.notifier).state =
-                                  MatchesSection.posts,
-                        ),
-                        const SizedBox(width: 8),
-                        SelectionPill(
-                          label: 'Past',
-                          selected: section == MatchesSection.past,
-                          onTap: () =>
-                              ref.read(matchesSectionProvider.notifier).state =
-                                  MatchesSection.past,
-                        ),
-                        const SizedBox(width: 8),
-                        SelectionPill(
-                          label: 'Cancelled',
-                          selected: section == MatchesSection.cancelled,
-                          onTap: () =>
-                              ref.read(matchesSectionProvider.notifier).state =
-                                  MatchesSection.cancelled,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          section == MatchesSection.posts
-                              ? 'Rides you’ve posted'
-                              : 'Your ${section.name} connections',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
-                      if (section != MatchesSection.posts)
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: role,
-                            isDense: true,
-                            style: const TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 11,
-                              color: AppColors.muted,
-                            ),
-                            items: ['All rides', 'As a rider', 'As a driver']
-                                .map(
-                                  (r) => DropdownMenuItem(
-                                    value: r,
-                                    child: Text(r),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (r) => setState(() => role = r!),
-                          ),
-                        )
-                      else
-                        const LiveDot(),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  if (section == MatchesSection.posts)
-                    posts.when(
-                      data: (_) => ownPosts.isEmpty
-                          ? _empty(
-                              'Your first shared ride starts here.',
-                              'Post an offer or request and let your campus find you.',
-                              post: true,
-                            )
-                          : ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: ownPosts.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 14),
-                              itemBuilder: (_, i) =>
-                                  _PostCard(ride: ownPosts[i]),
-                            ),
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      error: (e, _) => ErrorState(
-                        error: e,
-                        retry: () => ref.invalidate(ridesProvider),
-                      ),
-                    )
-                  else
-                    data.when(
-                      data: (_) => filtered.isEmpty
-                          ? _empty(
-                              section == MatchesSection.upcoming
-                                  ? 'Your next connection is waiting.'
-                                  : 'Nothing here just yet.',
-                              section == MatchesSection.upcoming
-                                  ? 'Find a ride on your route, reserve a seat, and say hello. Your connections will appear here.'
-                                  : 'Your ${section.name} connections will be listed here. Try another ride role if a filter is active.',
-                            )
-                          : ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: filtered.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 15),
-                              itemBuilder: (_, i) =>
-                                  _MatchCard(match: filtered[i]),
-                            ),
-                      loading: () => const Surface(
-                        child: SizedBox(
-                          height: 200,
-                          child: Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      ),
-                      error: (e, _) => ErrorState(
-                        error: e,
-                        retry: () => ref.invalidate(matchesProvider),
-                      ),
-                    ),
-                  const SizedBox(height: 25),
-                  Surface(
-                    color: AppColors.sage,
-                    padding: const EdgeInsets.all(21),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          color: AppColors.green,
-                          size: 23,
-                        ),
-                        const SizedBox(width: 14),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'A quick hello makes a smooth pickup.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                'Confirm the exact meeting spot in chat. If your plans change, cancel before departure — seats return to the offer automatically.',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.green,
-                                  height: 1.8,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _empty(String title, String subtitle, {bool post = false}) =>
-      EmptyState(
-        title: title,
-        subtitle: subtitle,
-        icon: Icons.handshake_outlined,
-        action: PrimaryButton(
-          label: post ? 'Post a ride' : 'Find a ride',
-          onPressed: () => ref.read(tabProvider.notifier).state = post
-              ? AppTab.post
-              : AppTab.find,
-        ),
-      );
-}
-
-class _Stat extends StatelessWidget {
-  final IconData icon;
-  final String value, label;
-  final bool dark;
-  const _Stat({
-    required this.icon,
-    required this.value,
-    required this.label,
-    this.dark = false,
-  });
-  @override
-  Widget build(BuildContext context) => Surface(
-    color: dark ? AppColors.ink : Colors.white,
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+        .length;
+    return Column(
       children: [
-        Icon(
-          icon,
-          size: 19,
-          color: dark ? const Color(0xFFB6D6A9) : AppColors.green,
-        ),
-        const SizedBox(height: 14),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 29,
-            fontWeight: FontWeight.w800,
-            color: dark ? Colors.white : AppColors.ink,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: dark ? Colors.white.withValues(alpha: .65) : AppColors.muted,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _MatchCard extends ConsumerWidget {
-  final RideMatch match;
-  const _MatchCard({required this.match});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final driver = match.isDriver(ref.watch(currentStudentProvider)?.id ?? '');
-    final cancelled = match.status == MatchStatus.cancelled;
-    final offer = (ref.watch(ridesProvider).valueOrNull ?? [])
-        .where((r) => r.id == match.offerId)
-        .firstOrNull;
-    return Surface(
-      padding: const EdgeInsets.all(22),
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final small = c.maxWidth < 550;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        const PageHeader('My rides'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 19),
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Avatar(
-                    name: driver ? match.riderName : match.driverName,
-                    asset: driver ? match.riderAvatar : match.driverAvatar,
-                    size: 43,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          driver ? match.riderName : match.driverName,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          driver
-                              ? 'Your travel partner · Rider'
-                              : match.vehicle,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.muted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!small)
-                    RoleBadge(
-                      driver: driver,
-                      label: driver ? 'You’re driving' : 'You’re riding',
-                    ),
-                ],
+              Expanded(
+                child: Text(
+                  'Your rides.\nYour people.',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
-              if (small) ...[
-                const SizedBox(height: 12),
-                RoleBadge(
-                  driver: driver,
-                  label: driver ? 'You’re driving' : 'You’re riding',
+              Surface(
+                color: Colors.black,
+                radius: 18,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$upcoming',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Text(
+                      'Upcoming',
+                      style: TextStyle(fontSize: 8, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: _MainTab(
+                  'Connections',
+                  section != MatchesSection.posts,
+                  () => ref.read(matchesSectionProvider.notifier).state =
+                      MatchesSection.upcoming,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MainTab(
+                  'My posts',
+                  section == MatchesSection.posts,
+                  () => ref.read(matchesSectionProvider.notifier).state =
+                      MatchesSection.posts,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (section != MatchesSection.posts)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Row(
+              children: [
+                ...[
+                  (MatchesSection.upcoming, 'Upcoming'),
+                  (MatchesSection.past, 'Past'),
+                  (MatchesSection.cancelled, 'Cancelled'),
+                ].map(
+                  (entry) => Expanded(
+                    child: InkWell(
+                      onTap: () =>
+                          ref.read(matchesSectionProvider.notifier).state =
+                              entry.$1,
+                      child: Container(
+                        padding: const EdgeInsets.only(bottom: 11, top: 7),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: section == entry.$1
+                                  ? Colors.black
+                                  : AppColors.line,
+                              width: section == entry.$1 ? 2 : 1,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          entry.$2,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: section == entry.$1
+                                ? FontWeight.w800
+                                : FontWeight.w500,
+                            color: section == entry.$1
+                                ? Colors.black
+                                : AppColors.muted,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
-              const SizedBox(height: 22),
-              RouteRow(
-                origin: match.origin,
-                destination: match.destination,
-                vertical: small,
-              ),
-              const SizedBox(height: 18),
-              Wrap(
-                spacing: 18,
-                runSpacing: 9,
-                children: [
-                  InfoItem(
-                    Icons.calendar_today_outlined,
-                    dateLabel(match.departureAt, long: true),
-                  ),
-                  InfoItem(
-                    Icons.schedule_rounded,
-                    timeLabel(match.departureAt),
-                  ),
-                  InfoItem(
-                    Icons.airline_seat_recline_normal,
-                    '${match.seats} ${cancelled ? 'released' : 'reserved'}',
-                    color: cancelled ? AppColors.red : AppColors.green,
-                  ),
-                  if (driver && offer != null && !cancelled)
-                    InfoItem(
-                      Icons.event_seat_outlined,
-                      '${offer.availableSeats} still open',
+            ),
+          ),
+        if (section != MatchesSection.posts)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${connections.length} ${connections.length == 1 ? 'connection' : 'connections'}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.muted,
                     ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Divider(),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
+                  ),
+                ),
+                PopupMenuButton<int>(
+                  tooltip: 'Filter by your role',
+                  onSelected: (v) =>
+                      setState(() => driverFilter = v == 0 ? null : v == 1),
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 0, child: Text('All roles')),
+                    PopupMenuItem(value: 1, child: Text('I’m driving')),
+                    PopupMenuItem(value: 2, child: Text('I’m riding')),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 11),
                     child: Row(
                       children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: cancelled ? AppColors.red : AppColors.green,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
                         Text(
-                          cancelled
-                              ? 'Cancelled'
-                              : match.departureAt.isAfter(DateTime.now())
-                              ? 'Connected'
-                              : 'Past ride',
-                          style: TextStyle(
+                          driverFilter == null
+                              ? 'All roles'
+                              : driverFilter!
+                              ? 'Driving'
+                              : 'Riding',
+                          style: const TextStyle(
                             fontSize: 10,
-                            color: cancelled ? AppColors.red : AppColors.green,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        const SizedBox(width: 7),
+                        const AppIcon('chevron-down', size: 13),
                       ],
                     ),
                   ),
-                  OutlinedButton(
-                    onPressed: () => openPanel(
-                      context,
-                      MatchDetailsPanel(match: match, hostContext: context),
-                    ),
-                    child: const Text('Details'),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: section == MatchesSection.posts
+              ? posts.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  if (!cancelled) ...[
-                    const SizedBox(width: 9),
-                    PrimaryButton(
-                      label: 'Chat',
-                      icon: Icons.chat_bubble_outline_rounded,
-                      arrow: false,
-                      onPressed: () => openPanel(
-                        context,
-                        ChatPanel(match: match),
-                        width: 560,
+                  error: (e, s) =>
+                      EmptyState('Couldn’t load posts', friendlyError(e)),
+                  data: (list) => list.isEmpty
+                      ? _empty(true)
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                          itemCount: list.length,
+                          separatorBuilder: (_, i) =>
+                              const SizedBox(height: 16),
+                          itemBuilder: (_, i) => _Post(list[i]),
+                        ),
+                )
+              : all.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (e, s) =>
+                      EmptyState('Couldn’t load connections', friendlyError(e)),
+                  data: (_) => connections.isEmpty
+                      ? _empty(false)
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                          itemCount: connections.length,
+                          separatorBuilder: (_, i) =>
+                              const SizedBox(height: 16),
+                          itemBuilder: (_, i) =>
+                              _Connection(connections[i], uid: uid),
+                        ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _empty(bool posts) => ListView(
+    children: [
+      EmptyState(
+        posts ? 'No posts yet.' : 'No connections here yet.',
+        posts
+            ? 'Offer a seat or ask for a lift. Your posts will live here.'
+            : 'Find a ride heading your way. Confirmed connections appear here.',
+        icon: posts ? 'file-text' : 'route',
+        action: OutlinedButton(
+          onPressed: () => ref.read(tabProvider.notifier).state = posts
+              ? AppTab.post
+              : AppTab.find,
+          child: Text(posts ? 'Post a ride' : 'Find a ride'),
+        ),
+      ),
+    ],
+  );
+}
+
+class _MainTab extends StatelessWidget {
+  final String text;
+  final bool active;
+  final VoidCallback tap;
+  const _MainTab(this.text, this.active, this.tap);
+  @override
+  Widget build(BuildContext context) => FilledButton(
+    onPressed: tap,
+    style: FilledButton.styleFrom(
+      backgroundColor: active ? Colors.black : const Color(0xFFE8E8E8),
+      foregroundColor: active ? Colors.white : Colors.black,
+      minimumSize: const Size(0, 49),
+    ),
+    child: Text(text, style: const TextStyle(fontSize: 12)),
+  );
+}
+
+class _Connection extends StatelessWidget {
+  final RideMatch m;
+  final String uid;
+  const _Connection(this.m, {required this.uid});
+  @override
+  Widget build(BuildContext context) {
+    final driver = m.driverId == uid;
+    final cancelled = m.status == MatchStatus.cancelled;
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Avatar(
+                  name: driver ? m.riderName : m.driverName,
+                  asset: driver ? m.riderAvatar : m.driverAvatar,
+                  size: 41,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        driver ? m.riderName : m.driverName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        cancelled
+                            ? 'Cancelled connection'
+                            : driver
+                            ? 'Your rider'
+                            : 'Your driver',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                RoleBadge(driver: driver, label: driver ? 'Driving' : 'Riding'),
+              ],
+            ),
+            const SizedBox(height: 18),
+            RouteSummary(originId: m.originId, destinationId: m.destinationId),
+            const SizedBox(height: 13),
+            DetailRow(
+              'Date & time',
+              '${dateLabel(m.departureAt)} · ${timeLabel(m.departureAt)}',
+            ),
+            DetailRow('Reserved seats', '${m.seats}'),
+            DetailRow('Vehicle', m.vehicle),
+            const Divider(height: 21),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => MatchDetailsScreen(match: m),
                       ),
                     ),
-                  ],
-                ],
-              ),
-            ],
-          );
-        },
+                    child: const Text(
+                      'Details',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ChatScreen(match: m),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AppIcon(
+                          'message-circle',
+                          size: 17,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text('Chat', style: TextStyle(fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _PostCard extends ConsumerWidget {
-  final Ride ride;
-  const _PostCard({required this.ride});
+class _Post extends ConsumerWidget {
+  final Ride r;
+  const _Post(this.r);
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final driver = ride.kind == RideKind.offer,
-        past = !ride.departureAt.isAfter(DateTime.now());
+    final offer = r.kind == RideKind.offer;
     return Surface(
-      padding: const EdgeInsets.all(22),
-      child: LayoutBuilder(
-        builder: (context, c) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                RoleBadge(
-                  driver: driver,
-                  label: driver ? 'Your ride offer' : 'Your ride request',
-                ),
-                const Spacer(),
-                Text(
-                  past
-                      ? 'Departed'
-                      : !ride.active
-                      ? 'Matched'
-                      : ride.availableSeats == 0
-                      ? 'Full'
-                      : 'Open',
-                  style: const TextStyle(
-                    color: AppColors.green,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            RouteRow(
-              origin: ride.origin,
-              destination: ride.destination,
-              vertical: c.maxWidth < 470,
-            ),
-            const SizedBox(height: 18),
-            Wrap(
-              spacing: 18,
-              runSpacing: 9,
-              children: [
-                InfoItem(
-                  Icons.calendar_today_outlined,
-                  dateLabel(ride.departureAt, long: true),
-                ),
-                InfoItem(Icons.schedule, timeLabel(ride.departureAt)),
-                InfoItem(
-                  Icons.airline_seat_recline_normal,
-                  driver
-                      ? '${ride.availableSeats} / ${ride.totalSeats} seats available'
-                      : '${ride.totalSeats} seats needed',
-                ),
-                InfoItem(
-                  Icons.payments_outlined,
-                  '₹${ride.contribution} / seat',
-                ),
-              ],
-            ),
-            if (driver) ...[
-              const SizedBox(height: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              RoleBadge(
+                driver: offer,
+                label: offer ? 'Your offer' : 'Your request',
+              ),
+              const Spacer(),
               Text(
-                ride.vehicle,
-                style: const TextStyle(color: AppColors.muted, fontSize: 11),
+                !r.active
+                    ? 'Matched'
+                    : r.departureAt.isAfter(DateTime.now())
+                    ? 'Active'
+                    : 'Past',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
-            const SizedBox(height: 19),
-            const Divider(),
-            const SizedBox(height: 15),
-            Align(
-              alignment: Alignment.centerRight,
-              child: PrimaryButton(
-                label: driver
-                    ? 'Find compatible riders'
-                    : 'Find compatible drivers',
-                onPressed: past || !ride.active || ride.availableSeats == 0
-                    ? null
-                    : () {
-                        ref
-                            .read(rideFiltersProvider.notifier)
-                            .state = RideFilters(
-                          originId: ride.originId,
-                          destinationId: ride.destinationId,
-                          date: ride.departureAt,
-                          kind: driver ? RideKind.request : RideKind.offer,
-                          minimumSeats: driver ? 1 : ride.totalSeats,
-                          timeMinutes:
-                              ride.departureAt.hour * 60 +
-                              ride.departureAt.minute,
-                        );
-                        ref.read(requestContextProvider.notifier).state = driver
-                            ? null
-                            : ride.id;
-                        ref.read(tabProvider.notifier).state = AppTab.find;
-                      },
+          ),
+          const SizedBox(height: 17),
+          RouteSummary(originId: r.originId, destinationId: r.destinationId),
+          const SizedBox(height: 13),
+          DetailRow(
+            'Date & time',
+            '${dateLabel(r.departureAt)} · ${timeLabel(r.departureAt)}',
+          ),
+          DetailRow(
+            offer ? 'Seats available' : 'Requested seats',
+            offer
+                ? '${r.availableSeats} of ${r.totalSeats}'
+                : '${r.totalSeats}',
+          ),
+          if (offer) DetailRow('Vehicle', r.vehicle),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => RideDetailsScreen(rideId: r.id),
+                ),
               ),
+              child: const Text('View details'),
             ),
-          ],
-        ),
+          ),
+          if (!offer && r.active && r.departureAt.isAfter(DateTime.now()))
+            TextButton(
+              onPressed: () {
+                ref.read(requestContextProvider.notifier).state = r.id;
+                ref.read(rideFiltersProvider.notifier).state = RideFilters(
+                  originId: r.originId,
+                  destinationId: r.destinationId,
+                  date: r.departureAt,
+                  minimumSeats: r.totalSeats,
+                  timeMinutes: r.departureAt.hour * 60 + r.departureAt.minute,
+                );
+                ref.read(tabProvider.notifier).state = AppTab.find;
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const FindRideScreen(),
+                  ),
+                );
+              },
+              child: const Text('Find compatible drivers'),
+            ),
+        ],
       ),
     );
   }
