@@ -1,0 +1,74 @@
+{
+  "writes": [
+    {
+      "update": {
+        "name": "projects/ridetogether-62ec7/databases/(default)/documents/rides/dummy_ride_1",
+        "fields": {
+          "id": { "stringValue": "dummy_ride_1" },
+          "ownerId": { "stringValue": "Ds5GJc5l13cdpYDSfZJfdn2lf2o2" },
+          "ownerName": { "stringValue": "Aarav" },
+          "ownerAvatar": { "stringValue": "aarav" },
+          "originId": { "stringValue": "north_gate" },
+          "destinationId": { "stringValue": "riverside_metro" },
+          "kind": { "stringValue": "offer" },
+          "departureAt": { "timestampValue": "2026-10-06T10:00:00Z" },
+          "dateKey": { "stringValue": "2026-10-06" },
+          "totalSeats": { "integerValue": "3" },
+          "availableSeats": { "integerValue": "3" },
+          "contribution": { "integerValue": "40" },
+          "campusId": { "stringValue": "greenfield" },
+          "vehicle": { "stringValue": "Honda Civic" },
+          "note": { "stringValue": "Leaving right after morning classes." },
+          "active": { "booleanValue": true },
+          "matchedId": { "stringValue": "" },
+          "lastMatchId": { "stringValue": "" }
+        }
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "createdAt",
+          "setToServerValue": "REQUEST_TIME"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ]
+    },
+    {
+      "update": {
+        "name": "projects/ridetogether-62ec7/databases/(default)/documents/rides/dummy_ride_2",
+        "fields": {
+          "id": { "stringValue": "dummy_ride_2" },
+          "ownerId": { "stringValue": "Ds5GJc5l13cdpYDSfZJfdn2lf2o2" },
+          "ownerName": { "stringValue": "Aarav" },
+          "ownerAvatar": { "stringValue": "aarav" },
+          "originId": { "stringValue": "central_library" },
+          "destinationId": { "stringValue": "maple_hostel" },
+          "kind": { "stringValue": "offer" },
+          "departureAt": { "timestampValue": "2026-10-06T14:30:00Z" },
+          "dateKey": { "stringValue": "2026-10-06" },
+          "totalSeats": { "integerValue": "2" },
+          "availableSeats": { "integerValue": "2" },
+          "contribution": { "integerValue": "20" },
+          "campusId": { "stringValue": "greenfield" },
+          "vehicle": { "stringValue": "Honda Civic" },
+          "note": { "stringValue": "Study session over, heading back." },
+          "active": { "booleanValue": true },
+          "matchedId": { "stringValue": "" },
+          "lastMatchId": { "stringValue": "" }
+        }
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "createdAt",
+          "setToServerValue": "REQUEST_TIME"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@ abstract class RideRepository {
   bool get isDemo;
   Stream<Student?> watchSession();
   Future<void> signIn(String email, String password);
-  Future<void> register(String name, String email, String password);
+  Future<void> register(String name, String email, String password, {String university = ''});
   Future<void> signOut();
   Future<void> resetPassword(String email);
   Future<void> resendVerification();

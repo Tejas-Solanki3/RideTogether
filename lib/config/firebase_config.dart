@@ -1,12 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 
-/// Public client configuration, not admin credentials. Use --dart-define-from-file.
-/// Leave USE_FIREBASE unset to run the fully offline campus demo.
 class FirebaseConfig {
   static const enabled = bool.fromEnvironment(
     'USE_FIREBASE',
     defaultValue: false,
   );
+  
   static FirebaseOptions get options {
     const apiKey = String.fromEnvironment('FIREBASE_API_KEY');
     const appId = String.fromEnvironment('FIREBASE_APP_ID');

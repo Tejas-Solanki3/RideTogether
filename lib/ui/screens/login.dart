@@ -15,7 +15,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final form = GlobalKey<FormState>();
   final email = TextEditingController(),
       password = TextEditingController(),
-      name = TextEditingController();
+      name = TextEditingController(),
+      university = TextEditingController();
   bool register = false, obscure = true, busy = false;
   String? error;
   @override
@@ -23,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     email.dispose();
     password.dispose();
     name.dispose();
+    university.dispose();
     super.dispose();
   }
 
@@ -38,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (demo) {
         await repo.signIn(Student.demo.email, 'local-demo');
       } else if (register) {
-        await repo.register(name.text, email.text, password.text);
+        await repo.register(name.text, email.text, password.text, university: university.text);
       } else {
         await repo.signIn(email.text, password.text);
       }
@@ -156,6 +158,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : null,
                   ),
                   const SizedBox(height: 16),
+                  TextFormField(
+                    controller: university,
+                    textCapitalization: TextCapitalization.words,
+                    maxLength: 80,
+                    decoration: const InputDecoration(
+                      labelText: 'University Name',
+                      counterText: '',
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(18),
+                        child: AppIcon('graduation-cap', size: 19),
+                      ),
+                    ),
+                    validator: (v) => v == null || v.trim().length < 2
+                        ? 'Enter your university name.'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
                 ],
                 TextFormField(
                   key: const ValueKey('login_email'),
@@ -171,13 +190,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: AppIcon('mail', size: 19),
                     ),
                   ),
-                  validator: (v) =>
-                      v == null ||
-                          !RegExp(
-                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                          ).hasMatch(v.trim())
-                      ? 'Enter a valid campus email.'
-                      : null,
+                  validator: (v) {
+                    final email = v?.trim() ?? '';
+                    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+                      return 'Enter a valid campus email.';
+                    }
+                    if (!email.endsWith('.edu') && !email.endsWith('.ac.in')) {
+                      return 'Must use a .edu or .ac.in address.';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

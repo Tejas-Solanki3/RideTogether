@@ -307,11 +307,12 @@ class DemoRideRepository implements RideRepository {
   }
 
   @override
-  Future<void> register(String name, String email, String password) async {
+  Future<void> register(String name, String email, String password, {String university = ''}) async {
     _student = Student(
       id: 'demo_${email.trim().toLowerCase()}',
       name: name.trim(),
       email: email.trim(),
+      university: university.isEmpty ? 'Greenfield University' : university,
     );
     await _persist();
     _auth.add(_student);

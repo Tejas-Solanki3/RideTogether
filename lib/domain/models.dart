@@ -78,7 +78,7 @@ String dateLabel(DateTime d, {bool long = false}) {
 }
 
 class Student {
-  final String id, name, email, avatar;
+  final String id, name, email, avatar, university;
   final bool emailVerified;
   const Student({
     required this.id,
@@ -86,6 +86,7 @@ class Student {
     required this.email,
     this.avatar = 'rohan',
     this.emailVerified = false,
+    this.university = 'Greenfield University',
   });
   String get firstName => name.split(' ').first;
   Map<String, dynamic> toJson() => {
@@ -94,6 +95,7 @@ class Student {
     'email': email,
     'avatar': avatar,
     'emailVerified': emailVerified,
+    'university': university,
   };
   factory Student.fromJson(Map<String, dynamic> j) => Student(
     id: j['id'],
@@ -101,12 +103,14 @@ class Student {
     email: j['email'],
     avatar: j['avatar'] ?? 'rohan',
     emailVerified: j['emailVerified'] ?? false,
+    university: j['university'] ?? 'Greenfield University',
   );
   static const demo = Student(
     id: 'demo_ishaan',
     name: 'Ishaan Mehta',
     email: 'ishaan@greenfield.edu',
     avatar: 'aarav',
+    university: 'Greenfield University',
   );
 }
 
